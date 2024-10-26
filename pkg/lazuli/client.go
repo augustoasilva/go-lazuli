@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"time"
 
@@ -55,25 +54,21 @@ func (c *client) createRecord(ctx context.Context, p dto.CreateRecordParams) err
 	url := fmt.Sprintf("%s/com.atproto.repo.createRecord", c.xrpcURL)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
 	if err != nil {
-		slog.Error("fail to create record request struct", "error", err, "resource", p.Resource)
-		return nil
+		return newError(http.StatusInternalServerError, "fail to create record request struct", err.Error())
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.session.AccessJwt))
 	req.Header.Set("Content-Type", "application/json")
 
-	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		slog.Error("fail to do request to create record", "error", err, "resource", p.Resource)
-		return nil
+	// TODO: improve to use a more appropriate http client config
+	httpClient := http.DefaultClient
+	resp, doErr := httpClient.Do(req)
+	if doErr != nil {
+		return newError(http.StatusInternalServerError, "fail to do request to create record", doErr.Error())
 	}
 	if resp.StatusCode != http.StatusOK {
-		slog.Error("create record request failed", "status", resp, "resource", p.Resource)
-		return fmt.Errorf("create record request failed: %d", resp.StatusCode)
+		return newErrorFromResponse(resp, "create record request failed")
 	}
-
-	slog.Info("record created", "resource", p.Resource)
 
 	return nil
 }

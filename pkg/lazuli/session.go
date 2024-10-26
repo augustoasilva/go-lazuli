@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	"github.com/augustoasilva/go-lazuli/pkg/lazuli/dto"
@@ -22,22 +21,17 @@ func (c *client) CreateSession(ctx context.Context, identifier, password string)
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
-		return nil, err
+		return nil, newError(http.StatusInternalServerError, "error to create session", err.Error())
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		slog.Error("create session request failed", "status_code", resp.StatusCode)
-		return nil, fmt.Errorf("create session request failed: %d", resp.StatusCode)
+		return nil, newErrorFromResponse(resp, "create session request failed")
 	}
 
 	var didResponse dto.AuthResponse
 	if jsonDecoderErr := json.NewDecoder(resp.Body).Decode(&didResponse); jsonDecoderErr != nil {
-		slog.Error(
-			"error to decod json response",
-			"error", jsonDecoderErr,
-		)
-		return nil, jsonDecoderErr
+		return nil, newError(http.StatusInternalServerError, "error to decode json", jsonDecoderErr.Error())
 	}
 
 	c.session = &didResponse
