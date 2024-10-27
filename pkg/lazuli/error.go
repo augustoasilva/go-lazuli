@@ -30,9 +30,9 @@ func newError(code int, message string, details string) *Error {
 }
 
 func newErrorFromResponse(res *http.Response, message string) *Error {
-	defer res.Body.Close()
 	details := "could not get detail"
 	if res.Body != nil {
+		defer res.Body.Close()
 		b, err := io.ReadAll(res.Body)
 		if err == nil {
 			details = string(b)
