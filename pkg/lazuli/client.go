@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/augustoasilva/go-lazuli/pkg/lazuli/dto"
@@ -18,6 +19,8 @@ type Client interface {
 	CreatePostRecord(ctx context.Context, p dto.CreateRecordParams) error
 	CreateRepostRecord(ctx context.Context, p dto.CreateRecordParams) error
 	CreateLikeRecord(ctx context.Context, p dto.CreateRecordParams) error
+	GetPosts(ctx context.Context, atURIs ...string) (dto.Posts, error)
+	GetPost(ctx context.Context, atURI string) (*dto.Post, error)
 }
 
 type client struct {
@@ -56,8 +59,8 @@ func (c *client) createRecord(ctx context.Context, p dto.CreateRecordParams) err
 
 	jsonBody, _ := json.Marshal(body)
 
-	url := fmt.Sprintf("%s/com.atproto.repo.createRecord", c.xrpcURL)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
+	reqURL := fmt.Sprintf("%s/com.atproto.repo.createRecord", c.xrpcURL)
+	req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return newError(http.StatusInternalServerError, "fail to create record request struct", err.Error())
 	}
@@ -89,4 +92,49 @@ func (c *client) CreateRepostRecord(ctx context.Context, p dto.CreateRecordParam
 func (c *client) CreateLikeRecord(ctx context.Context, p dto.CreateRecordParams) error {
 	p.Resource = "app.bsky.feed.like"
 	return c.createRecord(ctx, p)
+}
+
+func (c *client) GetPosts(ctx context.Context, atURIs ...string) (dto.Posts, error) {
+	if len(atURIs) == 0 {
+		return nil, newError(http.StatusBadRequest, "invalid uris query param", "uris must have at least one value")
+	}
+	if len(atURIs) > 25 {
+		return nil, newError(http.StatusBadRequest, "invalid uris query param", "uris must have at most 25 values")
+	}
+
+	query := url.Values{
+		"uris": atURIs,
+	}
+	query.Encode()
+	reqURL := fmt.Sprintf("%s/app.bsky.feed.getPosts?%s", c.xrpcURL, query.Encode())
+	req, err := http.NewRequest("GET", reqURL, nil)
+	if err != nil {
+		return nil, newError(http.StatusInternalServerError, "fail to create get posts request struct", err.Error())
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.session.AccessJwt))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, doErr := c.httpClient.Do(req)
+	if doErr != nil {
+		return nil, newError(http.StatusInternalServerError, "fail to do request to get posts", doErr.Error())
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, newErrorFromResponse(resp, "get posts request failed")
+	}
+
+	var posts dto.Posts
+	if decodeErr := json.NewDecoder(resp.Body).Decode(&posts); decodeErr != nil {
+		return nil, newError(http.StatusInternalServerError, "fail to decode get posts response", decodeErr.Error())
+	}
+
+	return posts, nil
+}
+
+func (c *client) GetPost(ctx context.Context, atURI string) (*dto.Post, error) {
+	posts, err := c.GetPosts(ctx, atURI)
+	if err != nil {
+		return nil, err
+	}
+	return &posts[0], nil
 }
