@@ -43,6 +43,7 @@ exclude:
   # Exclude files or packages matching their paths
   paths:
     - example
+    - pkg/lazuli/dto
     # - \.pb\.go$    # excludes all protobuf generated files
     # - ^pkg/bar     # exclude package `pkg/bar`
 
