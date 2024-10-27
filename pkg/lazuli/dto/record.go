@@ -15,6 +15,7 @@ type PostRecord struct {
 
 type RequestRecord struct {
 	Subject   RepoStrongRef `json:"subject"`
+	Text      string        `json:"text,omitempty"`
 	CreatedAt time.Time     `json:"createdAt"`
 }
 
@@ -31,6 +32,7 @@ type RequestLikesFromPost struct {
 
 type CreateRecordParams struct {
 	Resource string
+	Text     string
 	URI      string
 	CID      string
 }

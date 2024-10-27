@@ -15,23 +15,27 @@ import (
 type Client interface {
 	ConsumeFirehose(ctx context.Context, handler HandlerCommitFn) error
 	CreateSession(ctx context.Context, identifier, password string) (*dto.AuthResponse, error)
+	CreatePostRecord(ctx context.Context, p dto.CreateRecordParams) error
 	CreateRepostRecord(ctx context.Context, p dto.CreateRecordParams) error
 	CreateLikeRecord(ctx context.Context, p dto.CreateRecordParams) error
 }
 
 type client struct {
-	xrpcURL  string
-	wsURL    string
-	wsDialer *websocket.Dialer
-	session  *dto.AuthResponse
+	xrpcURL    string
+	wsURL      string
+	wsDialer   *websocket.Dialer
+	session    *dto.AuthResponse
+	httpClient *http.Client
 }
 
 func NewClient(xrpcURL, wsURL string) Client {
 	dialer := *websocket.DefaultDialer
+	// TODO: improve to use a more appropriate http client config
 	return &client{
-		xrpcURL:  xrpcURL,
-		wsURL:    wsURL,
-		wsDialer: &dialer,
+		xrpcURL:    xrpcURL,
+		wsURL:      wsURL,
+		wsDialer:   &dialer,
+		httpClient: http.DefaultClient,
 	}
 }
 
@@ -41,6 +45,7 @@ func (c *client) createRecord(ctx context.Context, p dto.CreateRecordParams) err
 		Collection:    p.Resource,
 		Repo:          c.session.DID,
 		Record: dto.RequestRecord{
+			Text: p.Text,
 			Subject: dto.RepoStrongRef{
 				URI: p.URI,
 				CID: p.CID,
@@ -60,9 +65,7 @@ func (c *client) createRecord(ctx context.Context, p dto.CreateRecordParams) err
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.session.AccessJwt))
 	req.Header.Set("Content-Type", "application/json")
 
-	// TODO: improve to use a more appropriate http client config
-	httpClient := http.DefaultClient
-	resp, doErr := httpClient.Do(req)
+	resp, doErr := c.httpClient.Do(req)
 	if doErr != nil {
 		return newError(http.StatusInternalServerError, "fail to do request to create record", doErr.Error())
 	}
@@ -71,6 +74,11 @@ func (c *client) createRecord(ctx context.Context, p dto.CreateRecordParams) err
 	}
 
 	return nil
+}
+
+func (c *client) CreatePostRecord(ctx context.Context, p dto.CreateRecordParams) error {
+	p.Resource = "app.bsky.feed.post"
+	return c.createRecord(ctx, p)
 }
 
 func (c *client) CreateRepostRecord(ctx context.Context, p dto.CreateRecordParams) error {
