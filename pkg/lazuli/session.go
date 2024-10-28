@@ -17,9 +17,14 @@ func (c *client) CreateSession(ctx context.Context, identifier, password string)
 	}
 	requestBody, _ := json.Marshal(request)
 
-	url := fmt.Sprintf("%s/com.atproto.server.createSession", c.xrpcURL)
+	reqURL := fmt.Sprintf("%s/com.atproto.server.createSession", c.xrpcURL)
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, newError(http.StatusInternalServerError, "fail to create session request struct", err.Error())
+	}
+
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, newError(http.StatusInternalServerError, "error to create session", err.Error())
 	}
