@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/augustoasilva/go-lazuli/pkg/lazuli/dto"
+	"github.com/augustoasilva/go-lazuli/pkg/lazuli/bsky"
 	"github.com/fxamacker/cbor/v2"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
@@ -19,7 +19,7 @@ type MockHandlerCommitFn struct {
 	mock.Mock
 }
 
-func (m *MockHandlerCommitFn) Handle(evt dto.CommitEvent) error {
+func (m *MockHandlerCommitFn) Handle(evt bsky.CommitEvent) error {
 	args := m.Called(evt)
 	return args.Error(0)
 }
@@ -27,7 +27,7 @@ func (m *MockHandlerCommitFn) Handle(evt dto.CommitEvent) error {
 func TestClient_ConsumeFirehose(t *testing.T) {
 	type in struct {
 		ctx                    context.Context
-		events                 []dto.CommitEvent
+		events                 []bsky.CommitEvent
 		handler                *MockHandlerCommitFn
 		shouldBreakCBORDecoder bool
 	}
@@ -39,19 +39,19 @@ func TestClient_ConsumeFirehose(t *testing.T) {
 	tests := []struct {
 		name  string
 		in    in
-		setup func(events []dto.CommitEvent, handler *MockHandlerCommitFn)
+		setup func(events []bsky.CommitEvent, handler *MockHandlerCommitFn)
 		out   out
 	}{
 		{
 			name: "Given valid events, When ConsumeFirehose is called, Then it should process the events successfully",
 			in: in{
 				ctx: context.Background(),
-				events: []dto.CommitEvent{
-					dto.RepoCommitEvent{},
+				events: []bsky.CommitEvent{
+					bsky.RepoCommitEvent{},
 				},
 				handler: &MockHandlerCommitFn{},
 			},
-			setup: func(events []dto.CommitEvent, handler *MockHandlerCommitFn) {
+			setup: func(events []bsky.CommitEvent, handler *MockHandlerCommitFn) {
 				for _, event := range events {
 					handler.On("Handle", event).Return(nil)
 				}
@@ -64,13 +64,13 @@ func TestClient_ConsumeFirehose(t *testing.T) {
 			name: "Given an invalid event, When ConsumeFirehose is called, Then it should return an error",
 			in: in{
 				ctx: context.Background(),
-				events: []dto.CommitEvent{
-					dto.RepoCommitEvent{},
+				events: []bsky.CommitEvent{
+					bsky.RepoCommitEvent{},
 				},
 				handler:                &MockHandlerCommitFn{},
 				shouldBreakCBORDecoder: true,
 			},
-			setup: func(events []dto.CommitEvent, handler *MockHandlerCommitFn) {
+			setup: func(events []bsky.CommitEvent, handler *MockHandlerCommitFn) {
 				for _, event := range events {
 					handler.On("Handle", event).Return(nil)
 				}
@@ -83,12 +83,12 @@ func TestClient_ConsumeFirehose(t *testing.T) {
 			name: "Given a handler error, When ConsumeFirehose is called, Then it should return the handler's error",
 			in: in{
 				ctx: context.Background(),
-				events: []dto.CommitEvent{
-					dto.RepoCommitEvent{},
+				events: []bsky.CommitEvent{
+					bsky.RepoCommitEvent{},
 				},
 				handler: &MockHandlerCommitFn{},
 			},
-			setup: func(events []dto.CommitEvent, handler *MockHandlerCommitFn) {
+			setup: func(events []bsky.CommitEvent, handler *MockHandlerCommitFn) {
 				for _, event := range events {
 					handler.On("Handle", event).Return(newError(http.StatusInternalServerError, "handler error", "handler error"))
 				}

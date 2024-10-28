@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/augustoasilva/go-lazuli/pkg/lazuli"
-	lazulidto "github.com/augustoasilva/go-lazuli/pkg/lazuli/dto"
+	lazulidto "github.com/augustoasilva/go-lazuli/pkg/lazuli/bsky"
 )
 
 func main() {

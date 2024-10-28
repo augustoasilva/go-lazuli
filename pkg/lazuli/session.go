@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/augustoasilva/go-lazuli/pkg/lazuli/dto"
+	"github.com/augustoasilva/go-lazuli/pkg/lazuli/bsky"
 )
 
-func (c *client) CreateSession(ctx context.Context, identifier, password string) (*dto.AuthResponse, error) {
-	request := dto.SessionRequest{
+func (c *client) CreateSession(ctx context.Context, identifier, password string) (*bsky.AuthResponse, error) {
+	request := bsky.SessionRequest{
 		Identifier: identifier,
 		Password:   password,
 	}
@@ -34,7 +34,7 @@ func (c *client) CreateSession(ctx context.Context, identifier, password string)
 		return nil, newErrorFromResponse(resp, "create session request failed")
 	}
 
-	var didResponse dto.AuthResponse
+	var didResponse bsky.AuthResponse
 	if jsonDecoderErr := json.NewDecoder(resp.Body).Decode(&didResponse); jsonDecoderErr != nil {
 		return nil, newError(http.StatusInternalServerError, "error to decode json", jsonDecoderErr.Error())
 	}

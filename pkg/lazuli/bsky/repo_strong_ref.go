@@ -1,4 +1,4 @@
-package dto
+package bsky
 
 type RepoStrongRef struct {
 	LexiconTypeID string `json:"$type,omitempty"`

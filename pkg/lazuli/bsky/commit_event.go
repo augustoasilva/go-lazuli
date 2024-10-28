@@ -1,4 +1,4 @@
-package dto
+package bsky
 
 type CommitEvent interface {
 	Type() CommitEventType

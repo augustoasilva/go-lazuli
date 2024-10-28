@@ -1,4 +1,4 @@
-package dto
+package bsky
 
 type RepoCommitEvent struct {
 	Repo   string          `cbor:"repo"`

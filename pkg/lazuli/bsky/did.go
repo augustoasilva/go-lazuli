@@ -1,4 +1,4 @@
-package dto
+package bsky
 
 type DIDVerificationMethod struct {
 	ID                 string `json:"id"`

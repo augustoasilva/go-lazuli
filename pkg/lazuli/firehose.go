@@ -7,11 +7,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/augustoasilva/go-lazuli/pkg/lazuli/dto"
+	"github.com/augustoasilva/go-lazuli/pkg/lazuli/bsky"
 	"github.com/fxamacker/cbor/v2"
 )
 
-type HandlerCommitFn func(evt dto.CommitEvent) error
+type HandlerCommitFn func(evt bsky.CommitEvent) error
 
 // ConsumeFirehose connects to a websocket, reads messages, decodes them as repo commit events, and processes them using a handler function.
 //
@@ -36,7 +36,7 @@ func (c *client) ConsumeFirehose(ctx context.Context, handler HandlerCommitFn) e
 		decoder := cbor.NewDecoder(bytes.NewReader(message))
 
 		for {
-			var evt dto.RepoCommitEvent
+			var evt bsky.RepoCommitEvent
 			decodeErr := decoder.Decode(&evt)
 			if decodeErr != nil {
 				if decodeErr == io.EOF {

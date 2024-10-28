@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/augustoasilva/go-lazuli/pkg/lazuli/dto"
+	"github.com/augustoasilva/go-lazuli/pkg/lazuli/bsky"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +19,7 @@ func TestClient_CreateSession(t *testing.T) {
 	}
 
 	type out struct {
-		authResponse *dto.AuthResponse
+		authResponse *bsky.AuthResponse
 		err          error
 	}
 
@@ -37,12 +37,12 @@ func TestClient_CreateSession(t *testing.T) {
 				password:   "test-password",
 			},
 			out: out{
-				authResponse: &dto.AuthResponse{AccessJwt: "valid-token"},
+				authResponse: &bsky.AuthResponse{AccessJwt: "valid-token"},
 				err:          nil,
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				_ = json.NewEncoder(w).Encode(dto.AuthResponse{AccessJwt: "valid-token"})
+				_ = json.NewEncoder(w).Encode(bsky.AuthResponse{AccessJwt: "valid-token"})
 			},
 		},
 		{

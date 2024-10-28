@@ -9,25 +9,25 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/augustoasilva/go-lazuli/pkg/lazuli/dto"
+	"github.com/augustoasilva/go-lazuli/pkg/lazuli/bsky"
 	"github.com/gorilla/websocket"
 )
 
 type Client interface {
 	ConsumeFirehose(ctx context.Context, handler HandlerCommitFn) error
-	CreateSession(ctx context.Context, identifier, password string) (*dto.AuthResponse, error)
-	CreatePostRecord(ctx context.Context, p dto.CreateRecordParams) error
-	CreateRepostRecord(ctx context.Context, p dto.CreateRecordParams) error
-	CreateLikeRecord(ctx context.Context, p dto.CreateRecordParams) error
-	GetPosts(ctx context.Context, atURIs ...string) (dto.Posts, error)
-	GetPost(ctx context.Context, atURI string) (*dto.Post, error)
+	CreateSession(ctx context.Context, identifier, password string) (*bsky.AuthResponse, error)
+	CreatePostRecord(ctx context.Context, p bsky.CreateRecordParams) error
+	CreateRepostRecord(ctx context.Context, p bsky.CreateRecordParams) error
+	CreateLikeRecord(ctx context.Context, p bsky.CreateRecordParams) error
+	GetPosts(ctx context.Context, atURIs ...string) (bsky.Posts, error)
+	GetPost(ctx context.Context, atURI string) (*bsky.Post, error)
 }
 
 type client struct {
 	xrpcURL    string
 	wsURL      string
 	wsDialer   *websocket.Dialer
-	session    *dto.AuthResponse
+	session    *bsky.AuthResponse
 	httpClient *http.Client
 }
 
@@ -42,14 +42,14 @@ func NewClient(xrpcURL, wsURL string) Client {
 	}
 }
 
-func (c *client) createRecord(ctx context.Context, p dto.CreateRecordParams) error {
-	body := dto.RequestRecordBody{
+func (c *client) createRecord(ctx context.Context, p bsky.CreateRecordParams) error {
+	body := bsky.RequestRecordBody{
 		LexiconTypeID: p.Resource,
 		Collection:    p.Resource,
 		Repo:          c.session.DID,
-		Record: dto.RequestRecord{
+		Record: bsky.RequestRecord{
 			Text: p.Text,
-			Subject: dto.RepoStrongRef{
+			Subject: bsky.RepoStrongRef{
 				URI: p.URI,
 				CID: p.CID,
 			},
@@ -79,22 +79,22 @@ func (c *client) createRecord(ctx context.Context, p dto.CreateRecordParams) err
 	return nil
 }
 
-func (c *client) CreatePostRecord(ctx context.Context, p dto.CreateRecordParams) error {
+func (c *client) CreatePostRecord(ctx context.Context, p bsky.CreateRecordParams) error {
 	p.Resource = "app.bsky.feed.post"
 	return c.createRecord(ctx, p)
 }
 
-func (c *client) CreateRepostRecord(ctx context.Context, p dto.CreateRecordParams) error {
+func (c *client) CreateRepostRecord(ctx context.Context, p bsky.CreateRecordParams) error {
 	p.Resource = "app.bsky.feed.repost"
 	return c.createRecord(ctx, p)
 }
 
-func (c *client) CreateLikeRecord(ctx context.Context, p dto.CreateRecordParams) error {
+func (c *client) CreateLikeRecord(ctx context.Context, p bsky.CreateRecordParams) error {
 	p.Resource = "app.bsky.feed.like"
 	return c.createRecord(ctx, p)
 }
 
-func (c *client) GetPosts(ctx context.Context, atURIs ...string) (dto.Posts, error) {
+func (c *client) GetPosts(ctx context.Context, atURIs ...string) (bsky.Posts, error) {
 	if len(atURIs) == 0 {
 		return nil, newError(http.StatusBadRequest, "invalid uris query param", "uris must have at least one value")
 	}
@@ -123,7 +123,7 @@ func (c *client) GetPosts(ctx context.Context, atURIs ...string) (dto.Posts, err
 		return nil, newErrorFromResponse(resp, "get posts request failed")
 	}
 
-	var posts dto.Posts
+	var posts bsky.Posts
 	if decodeErr := json.NewDecoder(resp.Body).Decode(&posts); decodeErr != nil {
 		return nil, newError(http.StatusInternalServerError, "fail to decode get posts response", decodeErr.Error())
 	}
@@ -131,7 +131,7 @@ func (c *client) GetPosts(ctx context.Context, atURIs ...string) (dto.Posts, err
 	return posts, nil
 }
 
-func (c *client) GetPost(ctx context.Context, atURI string) (*dto.Post, error) {
+func (c *client) GetPost(ctx context.Context, atURI string) (*bsky.Post, error) {
 	posts, err := c.GetPosts(ctx, atURI)
 	if err != nil {
 		return nil, err

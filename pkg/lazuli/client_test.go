@@ -7,14 +7,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/augustoasilva/go-lazuli/pkg/lazuli/dto"
+	"github.com/augustoasilva/go-lazuli/pkg/lazuli/bsky"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestClient_CreatePostRecord(t *testing.T) {
 	type in struct {
 		ctx    context.Context
-		params dto.CreateRecordParams
+		params bsky.CreateRecordParams
 	}
 
 	type out struct {
@@ -31,7 +31,7 @@ func TestClient_CreatePostRecord(t *testing.T) {
 			name: "Given a CreatePostRecord function call, When there is valid params and successful response, Then it should create a post record",
 			in: in{
 				ctx: context.Background(),
-				params: dto.CreateRecordParams{
+				params: bsky.CreateRecordParams{
 					Text:     "test text",
 					URI:      "test-uri",
 					CID:      "test-cid",
@@ -49,7 +49,7 @@ func TestClient_CreatePostRecord(t *testing.T) {
 			name: "Given a CreatePostRecord function call, When there is request creation failure, Then it should return an error",
 			in: in{
 				ctx: context.Background(),
-				params: dto.CreateRecordParams{
+				params: bsky.CreateRecordParams{
 					Text:     "test text",
 					URI:      "test-uri",
 					CID:      "test-cid",
@@ -73,7 +73,7 @@ func TestClient_CreatePostRecord(t *testing.T) {
 
 			lazuliClient := &client{
 				xrpcURL:    server.URL,
-				session:    &dto.AuthResponse{AccessJwt: "test-token", DID: "test-did"},
+				session:    &bsky.AuthResponse{AccessJwt: "test-token", DID: "test-did"},
 				httpClient: server.Client(),
 			}
 
@@ -96,7 +96,7 @@ func TestClient_GetPosts(t *testing.T) {
 	}
 
 	type out struct {
-		posts dto.Posts
+		posts bsky.Posts
 		err   error
 	}
 
@@ -113,14 +113,14 @@ func TestClient_GetPosts(t *testing.T) {
 				atURIs: []string{"test-uri-1", "test-uri-2"},
 			},
 			out: out{
-				posts: dto.Posts{
+				posts: bsky.Posts{
 					{URI: "test-uri-1"},
 					{URI: "test-uri-2"},
 				},
 				err: nil,
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				posts := dto.Posts{
+				posts := bsky.Posts{
 					{URI: "test-uri-1"},
 					{URI: "test-uri-2"},
 				}
@@ -152,7 +152,7 @@ func TestClient_GetPosts(t *testing.T) {
 
 			lazuliClient := &client{
 				xrpcURL:    server.URL,
-				session:    &dto.AuthResponse{AccessJwt: "test-token"},
+				session:    &bsky.AuthResponse{AccessJwt: "test-token"},
 				httpClient: server.Client(),
 			}
 
@@ -177,7 +177,7 @@ func TestClient_GetPost(t *testing.T) {
 	}
 
 	type out struct {
-		post *dto.Post
+		post *bsky.Post
 		err  error
 	}
 
@@ -194,14 +194,14 @@ func TestClient_GetPost(t *testing.T) {
 				atURI: "test-uri",
 			},
 			out: out{
-				post: &dto.Post{
+				post: &bsky.Post{
 					URI: "test-uri",
 				},
 				err: nil,
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				post := dto.Post{URI: "test-uri"}
-				posts := dto.Posts{post}
+				post := bsky.Post{URI: "test-uri"}
+				posts := bsky.Posts{post}
 				w.WriteHeader(http.StatusOK)
 				_ = json.NewEncoder(w).Encode(posts)
 			},
@@ -230,7 +230,7 @@ func TestClient_GetPost(t *testing.T) {
 
 			lazuliClient := &client{
 				xrpcURL:    server.URL,
-				session:    &dto.AuthResponse{AccessJwt: "test-token"},
+				session:    &bsky.AuthResponse{AccessJwt: "test-token"},
 				httpClient: server.Client(),
 			}
 
@@ -251,7 +251,7 @@ func TestClient_GetPost(t *testing.T) {
 func TestClient_CreateRepostRecord(t *testing.T) {
 	type in struct {
 		ctx    context.Context
-		params dto.CreateRecordParams
+		params bsky.CreateRecordParams
 	}
 	type out struct {
 		err error
@@ -266,7 +266,7 @@ func TestClient_CreateRepostRecord(t *testing.T) {
 			name: "Given a CreateRepostRecord function call, when valid params are provided, then it should create a repost record and return no error",
 			in: in{
 				ctx: context.Background(),
-				params: dto.CreateRecordParams{
+				params: bsky.CreateRecordParams{
 					Text:     "test text",
 					URI:      "test-uri",
 					CID:      "test-cid",
@@ -284,7 +284,7 @@ func TestClient_CreateRepostRecord(t *testing.T) {
 			name: "Given a CreateRepostRecord function call, when request creation fails, then it should return an error",
 			in: in{
 				ctx: context.Background(),
-				params: dto.CreateRecordParams{
+				params: bsky.CreateRecordParams{
 					Text:     "test text",
 					URI:      "test-uri",
 					CID:      "test-cid",
@@ -306,7 +306,7 @@ func TestClient_CreateRepostRecord(t *testing.T) {
 			defer server.Close()
 			lazuliClient := &client{
 				xrpcURL:    server.URL,
-				session:    &dto.AuthResponse{AccessJwt: "test-token", DID: "test-did"},
+				session:    &bsky.AuthResponse{AccessJwt: "test-token", DID: "test-did"},
 				httpClient: server.Client(),
 			}
 			err := lazuliClient.CreateRepostRecord(tt.in.ctx, tt.in.params)
@@ -323,7 +323,7 @@ func TestClient_CreateRepostRecord(t *testing.T) {
 func TestClient_CreateLikeRecord(t *testing.T) {
 	type in struct {
 		ctx    context.Context
-		params dto.CreateRecordParams
+		params bsky.CreateRecordParams
 	}
 	type out struct {
 		err error
@@ -338,7 +338,7 @@ func TestClient_CreateLikeRecord(t *testing.T) {
 			name: "Given a CreateLikeRecord function call, when valid params are provided, it should create a like record and return no error",
 			in: in{
 				ctx: context.Background(),
-				params: dto.CreateRecordParams{
+				params: bsky.CreateRecordParams{
 					Text:     "test text",
 					URI:      "test-uri",
 					CID:      "test-cid",
@@ -356,7 +356,7 @@ func TestClient_CreateLikeRecord(t *testing.T) {
 			name: "Given a CreateLikeRecord function call, when request creation fails, then it should return an error",
 			in: in{
 				ctx: context.Background(),
-				params: dto.CreateRecordParams{
+				params: bsky.CreateRecordParams{
 					Text:     "test text",
 					URI:      "test-uri",
 					CID:      "test-cid",
@@ -378,7 +378,7 @@ func TestClient_CreateLikeRecord(t *testing.T) {
 			defer server.Close()
 			lazuliClient := &client{
 				xrpcURL:    server.URL,
-				session:    &dto.AuthResponse{AccessJwt: "test-token", DID: "test-did"},
+				session:    &bsky.AuthResponse{AccessJwt: "test-token", DID: "test-did"},
 				httpClient: server.Client(),
 			}
 			err := lazuliClient.CreateLikeRecord(tt.in.ctx, tt.in.params)

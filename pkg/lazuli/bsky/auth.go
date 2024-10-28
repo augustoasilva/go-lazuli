@@ -1,4 +1,4 @@
-package dto
+package bsky
 
 type SessionRequest struct {
 	Identifier string `json:"identifier"`
