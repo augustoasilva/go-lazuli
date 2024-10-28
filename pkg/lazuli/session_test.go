@@ -96,7 +96,7 @@ func TestClient_CreateSession(t *testing.T) {
 				authResponse: nil,
 				err: &Error{
 					Code:    http.StatusInternalServerError,
-					Message: "error to create session",
+					Message: "fail to create session request struct",
 					Details: `parse ":invalid-url/com.atproto.server.createSession": missing protocol scheme`,
 				},
 			},
@@ -110,7 +110,8 @@ func TestClient_CreateSession(t *testing.T) {
 			defer server.Close()
 
 			lazuliClient := &client{
-				xrpcURL: server.URL,
+				xrpcURL:    server.URL,
+				httpClient: server.Client(),
 			}
 
 			if tt.handler == nil {
