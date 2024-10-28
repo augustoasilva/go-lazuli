@@ -1,4 +1,8 @@
 # Lazuli Golang Package
+![CI Workflow](https://github.com/augustoasilva/go-lazuli/actions/workflows/ci-workflow.yml/badge.svg)
+![coverage](https://raw.githubusercontent.com/augustoasilva/go-lazuli/badges/.badges/2/merge/coverage.svg)
+[![Go Reference](https://pkg.go.dev/badge/github.com/augustoasilva/go-lazuli.svg)](https://pkg.go.dev/github.com/augustoasilva/go-lazuli)
+
 Lazuli is a Golang package that aims to help to work with AT Protocol and Bluesky Social Network
 
 The lazuli package is under development, so before the first release of 1.x, the code can change causing incompatibilities

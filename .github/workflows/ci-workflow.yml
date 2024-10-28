@@ -47,6 +47,7 @@ jobs:
     name: "Go Test Coverage"
     needs: golangci-lint
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -59,6 +60,8 @@ jobs:
         with:
           # Configure action using config file (option 1)
           config: ./.github/workflows/coverage/config.yml
+          git-token: ${{ github.ref_name == 'main' && secrets.GITHUB_TOKEN || '' }}
+          git-branch: badges
 
           # Configure action by specifying input parameters individually (option 2).
           # If you are using config file (option 1) you shouldn't use these parameters, however
