@@ -3,6 +3,7 @@ package lazuli
 import (
 	"bytes"
 	"context"
+	"github.com/gorilla/websocket"
 	"io"
 	"net/http"
 
@@ -25,6 +26,10 @@ func (c *client) ConsumeFirehose(ctx context.Context, handler HandlerCommitFn) e
 	for {
 		_, message, errMessage := conn.ReadMessage()
 		if errMessage != nil {
+			if websocket.IsCloseError(errMessage, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				// TODO: for now lets close firehose, but then improve to restart the websocket.
+				return nil
+			}
 			return newError(http.StatusInternalServerError, "fail to read message from websocket", errMessage.Error())
 		}
 
