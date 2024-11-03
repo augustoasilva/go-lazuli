@@ -18,6 +18,14 @@ func (e RepoCommitEvent) Type() CommitEventType {
 	return CommitEventTypeRepoCommit
 }
 
+func (e RepoCommitEvent) GetOps() []RepoOperation {
+	return e.Ops
+}
+
+func (e RepoCommitEvent) GetBlocks() []byte {
+	return e.Blocks
+}
+
 type RepoOperation struct {
 	Action string `cbor:"action"`
 	Path   string `cbor:"path"`
