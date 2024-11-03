@@ -18,6 +18,10 @@ func (e RepoCommitEvent) Type() CommitEventType {
 	return CommitEventTypeRepoCommit
 }
 
+func (e RepoCommitEvent) GetRepo() string {
+	return e.Repo
+}
+
 func (e RepoCommitEvent) GetOps() []RepoOperation {
 	return e.Ops
 }
