@@ -120,9 +120,11 @@ func TestClient_GetPosts(t *testing.T) {
 				err: nil,
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				posts := bsky.Posts{
-					{URI: "test-uri-1"},
-					{URI: "test-uri-2"},
+				posts := bsky.PostResponse{
+					Posts: bsky.Posts{
+						{URI: "test-uri-1"},
+						{URI: "test-uri-2"},
+					},
 				}
 				w.WriteHeader(http.StatusOK)
 				_ = json.NewEncoder(w).Encode(posts)
@@ -202,8 +204,9 @@ func TestClient_GetPost(t *testing.T) {
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				post := bsky.Post{URI: "test-uri"}
 				posts := bsky.Posts{post}
+				postResponse := bsky.PostResponse{Posts: posts}
 				w.WriteHeader(http.StatusOK)
-				_ = json.NewEncoder(w).Encode(posts)
+				_ = json.NewEncoder(w).Encode(postResponse)
 			},
 		},
 		{

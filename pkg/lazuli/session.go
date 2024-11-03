@@ -24,6 +24,8 @@ func (c *client) CreateSession(ctx context.Context, identifier, password string)
 		return nil, newError(http.StatusInternalServerError, "fail to create session request struct", err.Error())
 	}
 
+	req.Header.Set("Content-Type", "application/json")
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, newError(http.StatusInternalServerError, "error to create session", err.Error())
