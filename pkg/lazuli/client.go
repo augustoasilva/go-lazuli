@@ -123,12 +123,12 @@ func (c *client) GetPosts(ctx context.Context, atURIs ...string) (bsky.Posts, er
 		return nil, newErrorFromResponse(resp, "get posts request failed")
 	}
 
-	var posts bsky.Posts
-	if decodeErr := json.NewDecoder(resp.Body).Decode(&posts); decodeErr != nil {
+	var postsResponse bsky.PostResponse
+	if decodeErr := json.NewDecoder(resp.Body).Decode(&postsResponse); decodeErr != nil {
 		return nil, newError(http.StatusInternalServerError, "fail to decode get posts response", decodeErr.Error())
 	}
 
-	return posts, nil
+	return postsResponse.Posts, nil
 }
 
 func (c *client) GetPost(ctx context.Context, atURI string) (*bsky.Post, error) {

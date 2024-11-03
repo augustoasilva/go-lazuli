@@ -40,3 +40,7 @@ type Post struct {
 }
 
 type Posts []Post
+
+type PostResponse struct {
+	Posts Posts `json:"posts"`
+}
