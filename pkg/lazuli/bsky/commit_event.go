@@ -2,6 +2,7 @@ package bsky
 
 type CommitEvent interface {
 	Type() CommitEventType
+	GetRepo() string
 	GetOps() []RepoOperation
 	GetBlocks() []byte
 }
