@@ -2,15 +2,9 @@ package bsky
 
 import "time"
 
-type Reply struct {
-	Parent RepoStrongRef `json:"parent"`
-	Root   RepoStrongRef `json:"root"`
-}
-
-type PostRecord struct {
-	LexiconTypeID string `json:"$type"`
-	Text          string `json:"text"`
-	Reply         *Reply `json:"reply,omitempty"`
+type Record struct {
+	CID any    `json:"cid"`
+	URI string `json:"uri"`
 }
 
 type RequestRecord struct {

@@ -210,6 +210,21 @@ func TestClient_GetPost(t *testing.T) {
 			},
 		},
 		{
+			name: "Given a GetPost function call, When there is no posts found, Then it should return an error",
+			in: in{
+				ctx:   context.Background(),
+				atURI: "test-uri",
+			},
+			out: out{
+				post: nil,
+				err:  newError(http.StatusNotFound, "post not found", "post not found"),
+			},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_ = json.NewEncoder(w).Encode(bsky.PostResponse{Posts: make(bsky.Posts, 0)})
+			},
+		},
+		{
 			name: "Given a GetPost function call, When there is an invalid atURI, Then it should return an error",
 			in: in{
 				ctx:   context.Background(),

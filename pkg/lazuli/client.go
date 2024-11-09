@@ -136,5 +136,8 @@ func (c *client) GetPost(ctx context.Context, atURI string) (*bsky.Post, error) 
 	if err != nil {
 		return nil, err
 	}
+	if len(posts) == 0 {
+		return nil, newError(http.StatusNotFound, "post not found", "post not found")
+	}
 	return &posts[0], nil
 }
