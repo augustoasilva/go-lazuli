@@ -96,7 +96,7 @@ func TestClient_GetPosts(t *testing.T) {
 	}
 
 	type out struct {
-		posts bsky.Posts
+		posts bsky.PostRecords
 		err   error
 	}
 
@@ -113,7 +113,7 @@ func TestClient_GetPosts(t *testing.T) {
 				atURIs: []string{"test-uri-1", "test-uri-2"},
 			},
 			out: out{
-				posts: bsky.Posts{
+				posts: bsky.PostRecords{
 					{URI: "test-uri-1"},
 					{URI: "test-uri-2"},
 				},
@@ -121,7 +121,7 @@ func TestClient_GetPosts(t *testing.T) {
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				posts := bsky.PostResponse{
-					Posts: bsky.Posts{
+					Posts: bsky.PostRecords{
 						{URI: "test-uri-1"},
 						{URI: "test-uri-2"},
 					},
@@ -203,10 +203,25 @@ func TestClient_GetPost(t *testing.T) {
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				post := bsky.Post{URI: "test-uri"}
-				posts := bsky.Posts{post}
+				posts := bsky.PostRecords{post}
 				postResponse := bsky.PostResponse{Posts: posts}
 				w.WriteHeader(http.StatusOK)
 				_ = json.NewEncoder(w).Encode(postResponse)
+			},
+		},
+		{
+			name: "Given a GetPost function call, When there is no posts found, Then it should return an error",
+			in: in{
+				ctx:   context.Background(),
+				atURI: "test-uri",
+			},
+			out: out{
+				post: nil,
+				err:  newError(http.StatusNotFound, "post not found", "post not found"),
+			},
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_ = json.NewEncoder(w).Encode(bsky.PostResponse{Posts: make(bsky.PostRecords, 0)})
 			},
 		},
 		{
