@@ -96,7 +96,7 @@ func TestClient_GetPosts(t *testing.T) {
 	}
 
 	type out struct {
-		posts bsky.PostRecords
+		posts bsky.Posts
 		err   error
 	}
 
@@ -113,7 +113,7 @@ func TestClient_GetPosts(t *testing.T) {
 				atURIs: []string{"test-uri-1", "test-uri-2"},
 			},
 			out: out{
-				posts: bsky.PostRecords{
+				posts: bsky.Posts{
 					{URI: "test-uri-1"},
 					{URI: "test-uri-2"},
 				},
@@ -121,7 +121,7 @@ func TestClient_GetPosts(t *testing.T) {
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				posts := bsky.PostResponse{
-					Posts: bsky.PostRecords{
+					Posts: bsky.Posts{
 						{URI: "test-uri-1"},
 						{URI: "test-uri-2"},
 					},
@@ -203,7 +203,7 @@ func TestClient_GetPost(t *testing.T) {
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				post := bsky.Post{URI: "test-uri"}
-				posts := bsky.PostRecords{post}
+				posts := bsky.Posts{post}
 				postResponse := bsky.PostResponse{Posts: posts}
 				w.WriteHeader(http.StatusOK)
 				_ = json.NewEncoder(w).Encode(postResponse)
@@ -221,7 +221,7 @@ func TestClient_GetPost(t *testing.T) {
 			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				_ = json.NewEncoder(w).Encode(bsky.PostResponse{Posts: make(bsky.PostRecords, 0)})
+				_ = json.NewEncoder(w).Encode(bsky.PostResponse{Posts: make(bsky.Posts, 0)})
 			},
 		},
 		{

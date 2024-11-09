@@ -19,7 +19,7 @@ type Client interface {
 	CreatePostRecord(ctx context.Context, p bsky.CreateRecordParams) error
 	CreateRepostRecord(ctx context.Context, p bsky.CreateRecordParams) error
 	CreateLikeRecord(ctx context.Context, p bsky.CreateRecordParams) error
-	GetPosts(ctx context.Context, atURIs ...string) (bsky.PostRecords, error)
+	GetPosts(ctx context.Context, atURIs ...string) (bsky.Posts, error)
 	GetPost(ctx context.Context, atURI string) (*bsky.Post, error)
 }
 
@@ -94,7 +94,7 @@ func (c *client) CreateLikeRecord(ctx context.Context, p bsky.CreateRecordParams
 	return c.createRecord(ctx, p)
 }
 
-func (c *client) GetPosts(ctx context.Context, atURIs ...string) (bsky.PostRecords, error) {
+func (c *client) GetPosts(ctx context.Context, atURIs ...string) (bsky.Posts, error) {
 	if len(atURIs) == 0 {
 		return nil, newError(http.StatusBadRequest, "invalid uris query param", "uris must have at least one value")
 	}

@@ -57,8 +57,8 @@ type Post struct {
 	Viewer        PostViewer `json:"viewer"`
 }
 
-type PostRecords []Post
+type Posts []Post
 
 type PostResponse struct {
-	Posts PostRecords `json:"posts"`
+	Posts Posts `json:"posts"`
 }
